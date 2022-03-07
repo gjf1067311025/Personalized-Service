@@ -155,7 +155,7 @@ const AddModal = (
                           }),
                         ]}
                       >
-                        <Input placeholder="请输入关键词" style={{width:'96%'}} />
+                        <Input placeholder={T('multi_enterKey')} style={{width:'96%'}} />
                       </FormItem>
                     </Col>
                     <Col span={7}>
@@ -225,7 +225,7 @@ const AddModal = (
                     block 
                     icon={<PlusOutlined />}
                   >
-                    添加更多文案
+                    {T("multi_addMore")}
                   </Button>
                 </FormItem>
               </>

@@ -1,8 +1,7 @@
 import { Button, Input, notification, Popconfirm, Space, Table } from "antd";
 import React, { useEffect, useState } from "react";
-import { DeleteStarlingItem, EditStarlingItem } from "../../apis";
+import { DeleteStarlingItem, EditStarlingItem, GetStarlingList } from "../../apis";
 import T from "../../apis/translate";
-import { CloseOutlined, CheckOutlined } from '@ant-design/icons';
 
 const ItemTable = ({
   languageData,
@@ -38,7 +37,7 @@ const ItemTable = ({
     doSearch()
   }
 
-  const addItem = async (itemId: any, itemKey: any) => {
+  const editItem = async (itemId: any, itemKey: any) => {
     await EditStarlingItem({
       id: itemId,
       key: itemKey,
@@ -46,10 +45,15 @@ const ItemTable = ({
       english_text: EnglishValue,
       remark,
       is_machine_translate: machineTranslate,
-    }).then(()=>{
+    }).then(async ()=>{
       notification.success({ message: '编辑成功' })
+      doSearch()
+      const res = await GetStarlingList({});
+      const final = await GetStarlingList({page_num:1,page_size:res?.total || 20});
+      localStorage.setItem('starling',JSON.stringify(final?.starList||[]));
+      // setRefresh(true);
     });
-    doSearch()
+    
   }
 
   const columns: any = [
@@ -167,17 +171,17 @@ const ItemTable = ({
               setSelectedIndex(null)
             }}
           >
-            <CloseOutlined />
+            {T('const_cancel')}
           </Button>
           <Button 
             size="small" 
-            type="text"
+            type="link"
             onClick={() => {
-              addItem(record.id,record.key);
+              editItem(record.id,record.key);
               setSelectedIndex(null);
             }}
           >
-            <CheckOutlined style={{color: 'green'}}/>
+            {T('const_ok')}
           </Button>
         </Space>
         );

@@ -7,12 +7,22 @@ import SideMenu from './components/SideMenu';
 import Header from './components/Header';
 import './App.css';
 import "@arco-design/web-react/dist/css/arco.css";
+import { GetStarlingList } from './apis';
 
 const { Sider, Content } = Layout;
 
 const bsHistory = createBrowserHistory();
 
 const App: FC = () => {
+  useEffect(()=>{
+    const cacheLanguage = async () => {
+      const res = await GetStarlingList({});
+      const final = await GetStarlingList({page_num:1,page_size:res?.total || 20});
+      localStorage.setItem('starling',JSON.stringify(final?.starList||[]));
+    }
+    cacheLanguage();
+  },[])
+
   return (
     <RouterWrap history={bsHistory}>
       <Layout style={{ minWidth: 1440 }}>
