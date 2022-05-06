@@ -32,7 +32,7 @@ const ItemTable = ({
 
   const deleteItem = async (itemId: any) => {
     await DeleteStarlingItem(itemId).then(()=>{
-      notification.success({ message: '删除成功' })
+      notification.success({ message: T('const_deleteSuccessfully') })
     });
     doSearch()
   }
@@ -46,7 +46,7 @@ const ItemTable = ({
       remark,
       is_machine_translate: machineTranslate,
     }).then(async ()=>{
-      notification.success({ message: '编辑成功' })
+      notification.success({ message: T('const_editSuccessfully') })
       doSearch()
       const res = await GetStarlingList({});
       const final = await GetStarlingList({page_num:1,page_size:res?.total || 20});
@@ -64,7 +64,7 @@ const ItemTable = ({
     },
     {
       title: `${T('multi_chineseText')}`,
-      width: "22%",
+      width: "24%",
       key: "Chinese",
       dataIndex: "chinese_text",
       render: (text: any, _: any, index: any) => {
@@ -80,7 +80,7 @@ const ItemTable = ({
     },
     {
       title: `${T('multi_englishText')}`,
-      width: "22%",
+      width: "24%",
       key: "English",
       dataIndex: "english_text",
       render: (text: any, record: any, index: any) => {
@@ -111,7 +111,7 @@ const ItemTable = ({
     },
     {
       title: `${T('multi_remark')}`,
-      width: "22%",
+      width: "18%",
       key: "remark",
       dataIndex: "remark",
       render: (text: any, _: any, index: any) => {
@@ -149,7 +149,7 @@ const ItemTable = ({
               {T('const_edit')}
             </Button>
             <Popconfirm
-              title="确定删除该条内容，操作后无法撤回？"
+              title={T('const_deleteTips')}
               okText={T('const_ok')}
               cancelText={T('const_cancel')}
               placement="topRight"

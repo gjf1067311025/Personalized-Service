@@ -20,23 +20,31 @@ const StyledTabs = styled(Tabs)`
   }
 `;
 
+const StyledForm = styled(Form)`
+.arco-form-item {
+  margin-bottom: 15px;
+}
+`;
+
 const Config = ({
   contentList,
   setContentList,
   // selectedKey,
   // setSelectedKey,
   selectedIndex,
+  canvasStyle,
 }: {
   contentList: any;
   setContentList: any;
   // selectedKey: any;
   // setSelectedKey: any;
   selectedIndex: any;
+  canvasStyle: any;
 }) => {
   const [form] = Form.useForm();
 
   useEffect(() => {
-    console.log(contentList[selectedIndex]?.config);
+    // console.log(contentList[selectedIndex]?.config);
     form?.setFieldsValue(contentList[selectedIndex]?.config);
   }, [selectedIndex]);
 
@@ -52,7 +60,7 @@ const Config = ({
 
   return (
     <>
-      <Form form={form} labelCol={{ span: 6 }} wrapperCol={{ span: 18 }}>
+      <StyledForm form={form} labelCol={{ span: 6 }} wrapperCol={{ span: 18 }}>
         <FormItem label="名称" style={{ marginTop: '10px' }} field="name">
           <Input
             style={{ width: '90%' }}
@@ -77,6 +85,7 @@ const Config = ({
                 selectedIndex={selectedIndex}
                 form={form}
                 onConfigChange={onConfigChange}
+                canvasStyle={canvasStyle}
               />
             </div>
           </TabPane>
@@ -87,7 +96,7 @@ const Config = ({
           </TabPane>
         </StyledTabs>
         <Divider style={{ margin: 0 }} />
-      </Form>
+      </StyledForm>
     </>
   );
 };

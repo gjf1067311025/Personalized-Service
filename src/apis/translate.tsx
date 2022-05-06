@@ -20,7 +20,7 @@ const T = (
   const final = JSON.parse(res || '[]')?.filter((item: any) => {
     return item?.key === starling;
   })
-  if(starling==='const_add') console.log(final[0]);
+  // if(starling==='const_add') console.log(final[0]);
   if(!final?.length) return starling;
   if(lang==='en')
     return final?.[0].english_text;
