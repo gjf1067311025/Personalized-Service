@@ -1,8 +1,7 @@
 import React from 'react';
-import { testSrc } from '../constant';
-import './index.css';
+import '../index.css';
 
-const MyText = ({ config }: { config: any }) => {
+const MyText = ({ config,testData, }: { config: any; testData: any }) => {
   if (config?.text?.includes('&{') && config?.text?.includes('}&')) {
     let text = config?.text;
     let finalText = '';
@@ -10,7 +9,7 @@ const MyText = ({ config }: { config: any }) => {
       finalText += text?.split('&{')?.[0];
       text = text?.slice(text?.indexOf('&{') + 2);
       finalText +=
-        JSON.parse(JSON.stringify(testSrc))[`${text?.split('}&')?.[0]}`] ||
+        testData?.[`${text?.split('}&')?.[0]}`] ||
         text?.split('}&')?.[0];
       text = text?.slice(text?.indexOf('}&') + 2);
     }

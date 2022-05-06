@@ -56,9 +56,9 @@ const AddModal = (
     const finalItems = items?.filter((item: any) => {
       return item.key && item.chinese_text;
     });
-    console.log(finalItems);
+    // console.log(finalItems);
     if(finalItems?.length === 0) {
-      notification.success({ message: '无新增文案' })
+      notification.success({ message: T('multi_noNewText') })
       doSearch();
       reset();
       setShowModal(false);
@@ -67,12 +67,12 @@ const AddModal = (
     await AddStarlingItems({
       basic_info: finalItems
     }).then(()=>{
-      notification.success({ message: '添加成功' })
+      notification.success({ message: T('const_addSuccessfully') })
       doSearch();
       reset();
       setShowModal(false);
     }).catch (() => {
-      notification.error({message: '请检查错误'})
+      notification.error({message: T('multi_checkError')})
     });
   }
 
@@ -83,7 +83,7 @@ const AddModal = (
       visible={showModal}
       footer={[
         <>
-          <Popover content="选中后，未填写英文时，将自动翻译中文">
+          <Popover content={T('multi_MTTips')}>
             <Checkbox checked={checked} onChange={()=>{
               const items = form?.getFieldValue('addItems');
               form?.setFieldsValue({
@@ -150,7 +150,7 @@ const AddModal = (
                               if(!res?.is_exist) {
                                 return Promise.resolve();
                               }
-                              return Promise.reject("不能输入已存在的key值");
+                              return Promise.reject(T('multi_SameKeyTips'));
                             },
                           }),
                         ]}
@@ -164,14 +164,14 @@ const AddModal = (
                         name={[name, 'chinese_text']}
                       >
                         <Input
-                          placeholder="请输入中文文案"
+                          placeholder={T('multi_enterChinese')}
                           style={{width:'96%'}}
                           onBlur={async () => {
                             const items = form?.getFieldValue('addItems');
                             if(!checked) return;
                             if(!items[index].is_machine_translate) return;
                             if(!items[index].chinese_text) return;
-                            console.log(items[index].chinese_text)
+                            // console.log(items[index].chinese_text)
                             const res = await GetTranslation(items[index].chinese_text)
                             items[index].english_text = res?.text;
                             form?.setFieldsValue({
@@ -187,7 +187,7 @@ const AddModal = (
                         name={[name, 'english_text']}
                       >
                         <Input
-                          placeholder="请输入英文文案"
+                          placeholder={T('multi_enterEnglish')}
                           style={{width:'96%'}} 
                           onChange={(e: any)=>{
                             const items = form?.getFieldValue('addItems');
@@ -205,7 +205,7 @@ const AddModal = (
                         {...restField}
                         name={[name, 'remark']}
                       >
-                        <Input placeholder="请输入备注" style={{width:'96%'}} />
+                        <Input placeholder={T('multi_enterRemark')} style={{width:'96%'}} />
                       </FormItem>
                     </Col>
                     <FormItem

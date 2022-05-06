@@ -1,7 +1,9 @@
 // import { Input, Form } from '@arco-design/web-react';
 import React from 'react';
-import ImageStyle from '../components/ImageStyle';
-import TextStyle from '../components/TextStyle';
+import ImageStyle from '../components/Style/ImageStyle';
+import ListStyle from '../components/Style/ListStyle';
+import QrcodeStyle from '../components/Style/QrcodeStyle';
+import TextStyle from '../components/Style/TextStyle';
 
 // const FormItem = Form.Item;
 
@@ -12,6 +14,7 @@ const StyleConfig = ({
   selectedIndex,
   form,
   onConfigChange,
+  canvasStyle,
 }: {
   // selectedKey: any;
   contentList: any;
@@ -19,19 +22,36 @@ const StyleConfig = ({
   selectedIndex: any;
   form: any;
   onConfigChange: any;
+  canvasStyle: any;
 }) => {
-  if (contentList[selectedIndex]?.config?.type === 'image') {
+  if (contentList[selectedIndex]?.config?.type === 'Image') {
     return (
       <>
         <ImageStyle
           onConfigChange={onConfigChange}
           detail={contentList[selectedIndex]?.config}
+          canvasStyle={canvasStyle}
         />
       </>
     );
-  } else if (contentList[selectedIndex]?.config?.type === 'text') {
+  } else if (contentList[selectedIndex]?.config?.type === 'Text') {
     return (
       <TextStyle
+        onConfigChange={onConfigChange}
+        form={form}
+        detail={contentList[selectedIndex]?.config}
+      />
+    );
+  } else if (contentList[selectedIndex]?.config?.type === 'QRCode') {
+    return (
+      <QrcodeStyle
+        onConfigChange={onConfigChange}
+        detail={contentList[selectedIndex]?.config}
+      />
+    );
+  } else if (contentList[selectedIndex]?.config?.type === 'List') {
+    return (
+      <ListStyle
         onConfigChange={onConfigChange}
         form={form}
         detail={contentList[selectedIndex]?.config}

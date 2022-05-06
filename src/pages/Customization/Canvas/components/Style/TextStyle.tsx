@@ -4,6 +4,7 @@ import {
   Popover,
   Grid,
   InputNumber,
+  Radio,
 } from '@arco-design/web-react';
 import React, { useEffect, useState } from 'react';
 import styled from 'styled-components';
@@ -136,37 +137,54 @@ const TextStyle = ({
             />
           </FormItem>
         </Col>
-        <Col span={24}>
-          <FormItem label="字号" field="style.fontSize">
-            <InputNumber
-              style={{ width: '50%' }}
-              onChange={(val: any) => {
-                onConfigChange('fontSize', val, true);
-              }}
-              // hideControl={true}
-            />
-          </FormItem>
-        </Col>
-        <Col span={24}>
-          <FormItem label="字体" field="style.fontStyle">
-            <Input
-              style={{ width: '90%', marginRight: 10 }}
-              onChange={(val: any) => {
-                onConfigChange('fontStyle', val, true);
-              }}
-            />
-          </FormItem>
-        </Col>
-        <Col span={24}>
-          <FormItem label="字间距" field="style.lineHeight">
-            <InputNumber
-              style={{ width: '50%' }}
-              onChange={(val: any) => {
-                onConfigChange('lineHeight', val, true);
-              }}
-            />
-          </FormItem>
-        </Col>
+        <Col span={12}>
+            <FormItem
+              labelCol={{ span: 12 }}
+              wrapperCol={{ span: 12 }}
+              label="字号" field="style.fontSize">
+              <InputNumber
+                style={{ width: '80%' }}
+                onChange={(val: any) => {
+                  onConfigChange('fontSize', val, true);
+                }}
+                // hideControl={true}
+              />
+            </FormItem>
+          </Col>
+          <Col span={12}>
+            <FormItem
+              labelCol={{ span: 12 }}
+              wrapperCol={{ span: 12 }}
+              label="字间距" field="style.lineHeight">
+              <InputNumber
+                style={{ width: '80%' }}
+                step={0.1}
+                precision={1}
+                onChange={(val: any) => {
+                  onConfigChange('lineHeight', val, true);
+                }}
+              />
+            </FormItem>
+          </Col>
+          {/* <Col span={24}>
+            <FormItem label="字体" field="style.fontStyle">
+              <Input
+                style={{ width: '90%', marginRight: 10 }}
+                onChange={(val: any) => {
+                  onConfigChange('fontStyle', val, true);
+                }}
+              />
+            </FormItem>
+          </Col> */}
+          <Col span={24}>
+            <FormItem label="位置" field="style.textAlign">
+              <Radio.Group onChange={(val: any) => {onConfigChange('textAlign', val, true)}} >
+                <Radio value='left'>居左</Radio>
+                <Radio value='center'>居中</Radio>
+                <Radio value='right'>居右</Radio>
+              </Radio.Group>
+            </FormItem>
+          </Col>
       </Row>
     </>
   );

@@ -1,5 +1,5 @@
-import { Form, Grid, Input, InputNumber } from '@arco-design/web-react';
-import React from 'react';
+import { Checkbox, Form, Grid, Input, InputNumber } from '@arco-design/web-react';
+import React, { useState } from 'react';
 
 const FormItem = Form.Item;
 const { Row, Col } = Grid;
@@ -8,11 +8,16 @@ const ImageStyle = ({
   // form,
   onConfigChange,
   detail,
+  canvasStyle,
 }: {
   // form: any;
   onConfigChange: any;
   detail: any;
+  canvasStyle: any;
 }) => {
+  const [widthDisable, setWidthDisable] = useState<boolean>(false);
+  const [heightDisable, setHeightDisable] = useState<boolean>(false);
+
   return (
     <>
       <Row>
@@ -22,6 +27,7 @@ const ImageStyle = ({
             style={{ marginTop: '10px' }}
             field="image_url">
             <Input
+              placeholder='请粘贴图片地址'
               style={{ width: '90%' }}
               onChange={(val: any) => {
                 onConfigChange('image_url', val, false);
@@ -72,12 +78,24 @@ const ImageStyle = ({
             <InputNumber
               value={detail?.width?.split('px')[0]}
               style={{ width: '80%' }}
+              disabled={widthDisable}
               onChange={(val: any) => {
-                onConfigChange('width', `${val}px`, false);
+                onConfigChange('width', 
+                  val>canvasStyle?.width?.split('px')[0]?canvasStyle?.width:`${val}px`,
+                  false);
               }}
               hideControl={true}
             />
           </FormItem>
+        </Col>
+        <Col span={12}>
+          <Checkbox onChange={(checked: any) =>{
+            if (checked) {
+              onConfigChange('width', canvasStyle?.width, false);
+              setWidthDisable(true)
+            }
+            else setWidthDisable(false)
+          }}>宽度全屏</Checkbox>
         </Col>
         <Col span={12}>
           <FormItem
@@ -88,12 +106,24 @@ const ImageStyle = ({
             <InputNumber
               value={detail?.height?.split('px')[0]}
               style={{ width: '80%' }}
+              disabled={heightDisable}
               onChange={(val: any) => {
-                onConfigChange('height', `${val}px`, false);
+                onConfigChange('height', 
+                  val>canvasStyle?.height?.split('px')[0]?canvasStyle?.height:`${val}px`,
+                  false);
               }}
-              // hideControl={true}
+              hideControl={true}
             />
           </FormItem>
+        </Col>
+        <Col span={12}>
+          <Checkbox onChange={(checked: any) =>{
+            if (checked) {
+              onConfigChange('height', canvasStyle?.height, false);
+              setHeightDisable(true)
+            }
+            else setHeightDisable(false)
+          }}>高度全屏</Checkbox>
         </Col>
       </Row>
     </>

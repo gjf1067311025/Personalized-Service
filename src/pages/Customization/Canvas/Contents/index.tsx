@@ -1,8 +1,10 @@
 import { IconExpand } from '@arco-design/web-react/icon';
 import React, { useEffect } from 'react';
 // import styled from 'styled-components';
-import MyImage from '../components/MyImage';
-import MyText from '../components/MyText';
+import MyImage from '../components/MyFile/MyImage';
+import MyList from '../components/MyFile/MyList';
+import MyQRCode from '../components/MyFile/MyQrCode';
+import MyText from '../components/MyFile/MyText';
 import './index.css';
 
 const Contents = ({
@@ -11,12 +13,14 @@ const Contents = ({
   selectedKey,
   setSelectedKey,
   canvasStyle,
+  testData,
 }: {
   contentList: any[];
   setContentList: any;
   selectedKey: any;
   setSelectedKey: any;
   canvasStyle: any;
+  testData: any;
 }) => {
   window.addEventListener('click', (e: any) => {
     const id = e?.target?.id || e?.target?.offsetParent?.id;
@@ -41,26 +45,29 @@ const Contents = ({
     let isDown = false;
     let isBig = false;
     // 鼠标按下事件
-    if (moving && father && bigger) {
+    if (moving && father) {
       const fatherPos = father.getBoundingClientRect();
-      bigger.onmousedown = (e: any) => {
-        // 获取x坐标和y坐标
-        x = e.clientX;
-        y = e.clientY;
+      if(bigger) {
+        bigger.onmousedown = (e: any) => {
+          // 获取x坐标和y坐标
+          x = e.clientX;
+          y = e.clientY;
 
-        // 获取左部和顶部的偏移量
-        l = moving?.offsetLeft;
-        t = moving?.offsetTop;
+          // 获取左部和顶部的偏移量
+          l = moving?.offsetLeft;
+          t = moving?.offsetTop;
 
-        w = moving?.offsetWidth;
-        h = moving?.offsetHeight;
-        // 开关打开
-        isBig = true;
-        // 设置样式
-        // moving.style.cursor = 'move';
-      };
+          w = moving?.offsetWidth;
+          h = moving?.offsetHeight;
+          // 开关打开
+          isBig = true;
+          // 设置样式
+          // moving.style.cursor = 'move';
+        };
+      }
+      
       moving.onmousedown = (e: any) => {
-        console.log(fatherPos);
+        // console.log(fatherPos);
         // 获取x坐标和y坐标
         x = e.clientX;
         y = e.clientY;
@@ -114,8 +121,8 @@ const Contents = ({
           finalLeft = `${0}px`;
           finalRight = 'unset';
         } else if (nl + moving.offsetWidth > fatherPos.width) {
-          finalLeft = `unset`;
-          finalRight = `${0}px`;
+          finalLeft = `${fatherPos.width - moving.offsetWidth}px`;
+          finalRight = `unset`;
         } else {
           finalLeft = `${nl}px`;
           finalRight = 'unset';
@@ -131,8 +138,8 @@ const Contents = ({
           finalTop = `${0}px`;
           finalBottom = 'unset';
         } else if (nt + moving.offsetHeight > fatherPos.height) {
-          finalTop = `unset`;
-          finalBottom = `${0}px`;
+          finalTop = `${fatherPos.height-moving.offsetHeight}px`;
+          finalBottom = `unset`;
         } else {
           finalTop = `${nt}px`;
           finalBottom = 'unset';
@@ -144,6 +151,12 @@ const Contents = ({
         setContentList([...contentList]);
       };
       // 鼠标抬起事件
+      window.onmouseup = () => {
+        isDown = false;
+        isBig = false;
+        moving.style.cursor = 'default';
+      }
+      // 鼠标抬起事件
       moving.onmouseup = () => {
         // 开关关闭
         isDown = false;
@@ -154,10 +167,14 @@ const Contents = ({
   }, [selectedKey]);
 
   const getContent = (value: any) => {
-    if (value?.config?.type === 'image') {
+    if (value?.config?.type === 'Image') {
       return <MyImage config={value?.config} />;
-    } else if (value?.config?.type === 'text') {
-      return <MyText config={value?.config} />;
+    } else if (value?.config?.type === 'Text') {
+      return <MyText config={value?.config} testData={testData}/>;
+    } else if (value?.config?.type === 'QRCode') {
+      return <MyQRCode config={value?.config} />;
+    } else if (value?.config?.type === 'List') {
+      return <MyList config={value?.config} testData={testData}/>;
     } else {
       return null;
     }
@@ -200,7 +217,7 @@ const Contents = ({
               key={val?.key}
               id={val?.key}>
               {getContent(val)}
-              {selectedKey === val?.key ? (
+              {selectedKey === val?.key && val?.config?.type !== "QRCode" ? (
                 <IconExpand
                   id={`bigger${val?.key}`}
                   style={{
