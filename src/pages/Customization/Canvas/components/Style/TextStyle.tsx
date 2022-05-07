@@ -5,6 +5,7 @@ import {
   Grid,
   InputNumber,
   Radio,
+  Checkbox,
 } from '@arco-design/web-react';
 import React, { useEffect, useState } from 'react';
 import styled from 'styled-components';
@@ -13,6 +14,7 @@ import { ChromePicker } from 'react-color';
 const FormItem = Form.Item;
 const { TextArea } = Input;
 const { Row, Col } = Grid;
+const CheckboxGroup = Checkbox.Group;
 const StyledTextArea = styled(TextArea)`
   resize: none;
   /* -webkit-text-fill-color: black; */
@@ -31,8 +33,8 @@ const TextStyle = ({
 }) => {
   const [color, setColor] = useState<any>();
   useEffect(() => {
-    setColor(form?.getFieldValue('color') || '#000000');
-  }, [form]);
+    setColor(detail?.style?.color || form?.getFieldValue('color') || '#000000');
+  }, [detail]);
   const onChangeColor = (colorObj: any) => {
     setColor(colorObj.hex);
     onConfigChange('color', colorObj.hex, true);
@@ -50,26 +52,6 @@ const TextStyle = ({
                 onConfigChange('text', val, false);
               }}
             />
-          </FormItem>
-        </Col>
-        <Col span={24}>
-          <FormItem label="颜色" field="style.color">
-            <Popover
-              trigger="click"
-              content={
-                <ChromePicker
-                  color={color}
-                  onChange={onChangeColor}
-                  disableAlpha={true}
-                />
-              }>
-              <div
-                style={{
-                  width: '20px',
-                  height: '15px',
-                  background: color,
-                }}></div>
-            </Popover>
           </FormItem>
         </Col>
         <Col span={12}>
@@ -138,6 +120,30 @@ const TextStyle = ({
           </FormItem>
         </Col>
         <Col span={12}>
+            <FormItem 
+              label="颜色" field="style.color"
+              labelCol={{ span: 12 }}
+              wrapperCol={{ span: 12 }}
+            >
+              <Popover
+                trigger="click"
+                content={
+                  <ChromePicker
+                    color={color}
+                    onChange={onChangeColor}
+                    disableAlpha={true}
+                  />
+                }>
+                <div
+                  style={{
+                    width: '20px',
+                    height: '15px',
+                    background: color,
+                  }}></div>
+              </Popover>
+            </FormItem>
+          </Col>
+        <Col span={12}>
             <FormItem
               labelCol={{ span: 12 }}
               wrapperCol={{ span: 12 }}
@@ -155,7 +161,7 @@ const TextStyle = ({
             <FormItem
               labelCol={{ span: 12 }}
               wrapperCol={{ span: 12 }}
-              label="字间距" field="style.lineHeight">
+              label="行间距" field="style.lineHeight">
               <InputNumber
                 style={{ width: '80%' }}
                 step={0.1}
@@ -163,6 +169,22 @@ const TextStyle = ({
                 onChange={(val: any) => {
                   onConfigChange('lineHeight', val, true);
                 }}
+              />
+            </FormItem>
+          </Col>
+          <Col span={12}>
+            <FormItem
+              labelCol={{ span: 12 }}
+              wrapperCol={{ span: 12 }}
+              label="字间距"
+              field="">
+              <InputNumber
+                value={detail?.style?.letterSpacing?.split('px')[0]}
+                style={{ width: '80%' }}
+                onChange={(val: any) => {
+                  onConfigChange('letterSpacing', `${val}px`, true);
+                }}
+                hideControl={true}
               />
             </FormItem>
           </Col>
@@ -183,6 +205,39 @@ const TextStyle = ({
                 <Radio value='center'>居中</Radio>
                 <Radio value='right'>居右</Radio>
               </Radio.Group>
+            </FormItem>
+          </Col>
+          <Col span={24}>
+            <FormItem label="样式" field="">
+              {/* <CheckboxGroup> */}
+                <Checkbox 
+                  style={{marginRight:16}}
+                  checked={detail?.style?.fontWeight==='bold'} 
+                  onChange={(checked: any)=>{
+                    console.log(checked)
+                    if (checked) {onConfigChange('fontWeight', 'bold', true)}
+                    else {onConfigChange('fontWeight', 'normal', true)}
+                  }}
+                >加粗</Checkbox>
+                <Checkbox 
+                  style={{marginRight:16}}
+                  checked={detail?.style?.fontStyle==='italic'} 
+                  onChange={(checked: any)=>{
+                    console.log(checked)
+                    if (checked) {onConfigChange('fontStyle', 'italic', true)}
+                    else {onConfigChange('fontStyle', 'normal', true)}
+                  }}
+                >斜体</Checkbox>
+                <Checkbox 
+                  style={{marginRight:16}}
+                  checked={detail?.style?.textDecoration==='underline'} 
+                  onChange={(checked: any)=>{
+                    console.log(checked)
+                    if (checked) {onConfigChange('textDecoration', 'underline', true)}
+                    else {onConfigChange('textDecoration', 'none', true)}
+                  }}
+                >下划线</Checkbox>
+              {/* </CheckboxGroup> */}
             </FormItem>
           </Col>
       </Row>

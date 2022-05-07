@@ -3,11 +3,11 @@ import React from 'react';
 import avatarDef from '../../../../../icons/qr_code.png';
 import '../index.css';
 
-const MyQrCode = ({ config }: { config: any }) => {
+const MyQrCode = ({ config,testData, }: { config: any; testData: any }) => {
   return (
     <img
       className="my-qrcode"
-      src={config?.image_url || avatarDef}
+      src={testData?.[config?.image_url as keyof typeof testData] || avatarDef}
       draggable={false}></img>
   );
 };
