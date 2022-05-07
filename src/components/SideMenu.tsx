@@ -41,9 +41,9 @@ const SideMenu = () => {
           <div style={{textAlign:'center'}}>{T('const_multiLanguage')}</div>
         </MenuItem>
         <MenuItem
-          key="/customization/list"
+          key="/customization/canvas"
           onClick={() => {
-          history.push(`/customization/list`);
+          history.push(`/customization/canvas`);
         }}>
           <div style={{textAlign:'center'}}>{T('const_graphic')}</div>
         </MenuItem>

@@ -73,7 +73,11 @@ const Tools = ({
               style: {
                 fontSize: 14,
                 lineHeight: 1.3,
-                textAlign: 'left'
+                textAlign: 'left',
+                fontWeight: 'normal',
+                fontStyle: 'normal',
+                textDecoration: 'none',
+                letterSpacing:'0px'
               },
             },
           });

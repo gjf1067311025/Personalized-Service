@@ -1,4 +1,4 @@
-import { Button, Grid, Select } from '@arco-design/web-react';
+import { Button, Grid, Select, Upload } from '@arco-design/web-react';
 import React, { FC, useEffect, useState } from 'react';
 import { useHistory } from 'react-router-dom';
 import styled from 'styled-components';
@@ -12,6 +12,7 @@ import {test} from './constant'
 import DownloadModal from './DownloadModal';
 import JSZip from 'jszip'
 import { saveAs } from 'file-saver'
+import * as XLSX from 'xlsx'
 
 const StyledSelect = styled(Select)`
   .arco-select-view {
@@ -43,6 +44,7 @@ const Canvas: FC = () => {
   const [testData, setTestData] = useState<any>({})
   const [testChange, setTestChange] = useState<boolean>(false)
   const [canvasDownloadList, setCanvasDownloadList] = useState<any[]>([]);
+  const [fileList, setFileList] = useState<any>([])
 
   const DPR = () => {
     if (window.devicePixelRatio && window.devicePixelRatio > 1) {
@@ -178,57 +180,47 @@ const Canvas: FC = () => {
     })
   }
 
-  // const downloadCanvas = () => {
-  //   const dom = document.getElementById('father');
-  //   // const dom = document.querySelector('printHtml');
-  //   if (dom) {
-  //     const box = window.getComputedStyle(dom);
-  //     // DOM 节点计算后宽高
-  //     const width = parseValue(box.width);
-  //     const height = parseValue(box.height);
-  //     // 获取像素比-防止模糊
-  //     const scaleBy = DPR();
-  //     // 创建自定义 canvas 元素
-  //     const canvas = document.createElement('canvas');
-
-  //     // 设定 canvas 元素属性宽高为 DOM 节点宽高 * 像素比
-  //     canvas.width = width * scaleBy;
-  //     canvas.height = height * scaleBy;
-  //     // 设定 canvas css宽高为 DOM 节点宽高
-  //     canvas.style.width = `${width}px`;
-  //     canvas.style.height = `${height}px`;
-  //     // 获取画笔
-  //     const context = canvas.getContext('2d');
-
-  //     if (context) {
-  //       // 将所有绘制内容放大像素比倍
-  //       // context.scale(scaleBy, scaleBy);
-
-  //       // 将自定义 canvas 作为配置项传入，开始绘制
-  //       return html2canvas(dom, { 
-  //           canvas, 
-  //           allowTaint: true, 
-  //           useCORS: true,
-  //           scrollX: 0,
-  //           scrollY: 0,
-  //         }).then((canvasAll: any) => {
-  //         // document.querySelector("#canvasContainer").appendChild(canvas);
-  //         // return canvas.toDataURL("image/png");
-  //         setCanvasSrc(canvasAll.toDataURL('image/png'));
-  //         var oA = document.createElement("a");
-  //         document.body.appendChild(oA);
-  //         canvasDownloadList?.forEach((val: any, index: any)=>{
-  //           console.log(val)
-  //           oA.download = `图片${index}.png`;// 设置下载的文件名，默认是'下载'
-  //           oA.href = val
-  //           oA.click();
-  //         })
-  //         oA.remove(); // 下载之后把创建的元素删除
-  //         return canvasAll.toDataURL('image/png');
-  //       });
-  //     }
-  //   }
-  // };
+  //读取本地Excel表格
+function readWorkbookFromLocalFile(files: any) {
+  console.log(files)
+  var fileReader = new FileReader()
+  fileReader.readAsBinaryString(files[0])
+  return new Promise(function(resolve, reject) {
+      fileReader.onload = function (ev: any) {
+          try {
+              var data = ev?.target.result
+              var workbook = XLSX.read(data, {
+                  type: 'binary'
+              }) // 以二进制流方式读取得到整份excel表格对象
+              var fromTo = '';
+              var sheetContent = []
+              // 遍历每张表读取
+              for (var sheet in workbook.Sheets) {
+                  if (workbook.Sheets.hasOwnProperty(sheet)) {
+                      fromTo = workbook.Sheets[sheet]['!ref'] || '';
+                      console.log(XLSX.utils.sheet_to_csv(workbook.Sheets[sheet]))
+                      sheetContent.push(XLSX.utils.sheet_to_json(workbook.Sheets[sheet]))
+                      console.log(sheetContent)
+                      break; // 如果只取第一张表，就取消注释这行
+                  }
+              }
+              const respondBody = {
+                  code: 100,
+                  msg: '文件解析成功',
+                  body: sheetContent
+              }
+              resolve(respondBody)
+          } catch (e) {
+              const respondBody = {
+                  code: 500,
+                  msg: '文件类型不正确',
+                  body: ''
+              }
+              reject(respondBody)
+          }
+      }
+  })
+}
 
   const findKeys = () =>{
     const list : any[] = []
@@ -271,6 +263,20 @@ const Canvas: FC = () => {
 
   return (
     <>
+    <div>
+      <Upload
+        action='/' 
+        fileList={fileList}
+        onChange={(files: any)=>{
+          console.log(files)
+          setFileList(files);
+        }}
+        autoUpload={false}
+      />
+    </div>
+    <div style={{marginTop: 24}}><button onClick={()=>{readWorkbookFromLocalFile(fileList.map((val: any)=>{
+      return val?.originFile
+    }))}}>111</button></div>
     <div style={{ background: '#F2F2F2', height: '750px', marginTop: 24 }}>
       <Row>
         <Col span={7}>

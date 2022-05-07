@@ -22,7 +22,7 @@ const QrcodeStyle = ({
             style={{ marginTop: '10px' }}
             field="image_url">
             <Input
-              placeholder='请粘贴二维码地址'
+              placeholder='请输入二维码对应字段'
               style={{ width: '90%' }}
               onChange={(val: any) => {
                 onConfigChange('image_url', val, false);

@@ -172,7 +172,7 @@ const Contents = ({
     } else if (value?.config?.type === 'Text') {
       return <MyText config={value?.config} testData={testData}/>;
     } else if (value?.config?.type === 'QRCode') {
-      return <MyQRCode config={value?.config} />;
+      return <MyQRCode config={value?.config} testData={testData}/>;
     } else if (value?.config?.type === 'List') {
       return <MyList config={value?.config} testData={testData}/>;
     } else {

@@ -18,11 +18,14 @@ const StyledTabs = styled(Tabs)`
     padding-left: 8px;
     /* padding-right: 10px; */
   }
+  .arco-tabs-content {
+    padding-top: 10px;
+  }
 `;
 
 const StyledForm = styled(Form)`
 .arco-form-item {
-  margin-bottom: 15px;
+  margin-bottom: 14px;
 }
 `;
 

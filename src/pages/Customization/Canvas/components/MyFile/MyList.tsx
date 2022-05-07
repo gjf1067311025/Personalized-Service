@@ -14,7 +14,30 @@ const MyList = ({ config,testData, }: { config: any; testData: any }) => {
 	},[config.height])
 
   if (config?.text !== "List") {
-    const str = config?.text
+    let text = config?.text
+    let str = ''
+    if (text?.includes('&{') && text?.includes('}&')) {
+      // str = text?.slice(text?.indexOf('&{') + 2).split('}&')?.[0]
+      text = text?.slice(text?.indexOf('&{') + 2);
+      str += text?.split('}&')?.[0]
+      text = text?.slice(text?.indexOf('}&') + 2);
+    };
+    if (text?.includes('&{') && text?.includes('}&')) {
+      return (
+        <div
+					id="my-list"
+					className="my-list"
+					style={{ 
+						wordBreak: 'break-all', 
+						...config?.style, 
+						marginTop:config?.TopBottom === 'Bottom'? deltaHeight :'unset' 
+					}}
+				>
+					<div>List</div>
+					只可以包含一个数组字段名
+				</div>
+			)
+    }
     const finalList = testData?.[str as keyof typeof testData]
     if (typeof finalList === "string") {
 			return (
@@ -76,7 +99,16 @@ const MyList = ({ config,testData, }: { config: any; testData: any }) => {
 			>
 				{/* <div style={{bottom:0, position:'absolute'}}> */}
 				{finalList.map((val: any) => {
-						return <div>{val}</div>
+          let text = config?.text;
+          let finalText = '';
+          if (text?.includes('&{') && text?.includes('}&')) {
+            finalText += text?.split('&{')?.[0];
+            text = text?.slice(text?.indexOf('&{') + 2);
+            finalText += val
+            text = text?.slice(text?.indexOf('}&') + 2);
+          }
+          finalText += text;
+						return <div>{finalText}</div>
 				})}
 				{/* </div> */}
       </div>
