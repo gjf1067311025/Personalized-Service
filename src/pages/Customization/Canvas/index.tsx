@@ -1,4 +1,4 @@
-import { Button, Grid, Select, Upload } from '@arco-design/web-react';
+import { Button, Dropdown, Grid, Menu, Select, Upload } from '@arco-design/web-react';
 import React, { FC, useEffect, useState } from 'react';
 import { useHistory } from 'react-router-dom';
 import styled from 'styled-components';
@@ -8,7 +8,7 @@ import { canvansList } from './constant';
 import Contents from './Contents';
 import Tools from './Tools';
 import CanvasModal from './CanvasModal';
-import {test} from './constant'
+// import {test} from './constant'
 import DownloadModal from './DownloadModal';
 import JSZip from 'jszip'
 import { saveAs } from 'file-saver'
@@ -29,7 +29,7 @@ const { Option } = Select;
 const Canvas: FC = () => {
   const history = useHistory();
 
-  const [contentList, setContentList] = useState<any[]>(test || []);
+  const [contentList, setContentList] = useState<any[]>([]);
   const [selectedKey, setSelectedKey] = useState<any>();
   const [selectedIndex, setSelectedIndex] = useState<any>();
   const [showModal, setShowModal] = useState<boolean>(false);
@@ -45,6 +45,8 @@ const Canvas: FC = () => {
   const [testChange, setTestChange] = useState<boolean>(false)
   const [canvasDownloadList, setCanvasDownloadList] = useState<any[]>([]);
   const [fileList, setFileList] = useState<any>([])
+  const [templateList, setTemplateList] = useState<any>([])
+  const [testSrc, setTestSrc] = useState<any[]>([])
 
   const DPR = () => {
     if (window.devicePixelRatio && window.devicePixelRatio > 1) {
@@ -101,7 +103,7 @@ const Canvas: FC = () => {
   };
 
   const drawDownloadCanvas = (number: number) => {
-    console.log(number)
+    // console.log(number)
     const dom = document.getElementById('father');
     // const dom = document.querySelector('printHtml');
     if (dom) {
@@ -168,7 +170,7 @@ const Canvas: FC = () => {
     const files = canvasDownloadList
     for (let i in files) {
       let promise = getFileBlob(files[i]).then((res: any) => {
-        const file_name = `图片${i}.png`;
+        const file_name = `${testData?.id || '图片'}.png`;
         zip.file(file_name, res, { binary: true })
       })
       result.push(promise)
@@ -180,47 +182,170 @@ const Canvas: FC = () => {
     })
   }
 
+  const downloadTemplate = (fileName: string, fileMsg: any) => {
+    const elementA = document.createElement('a');
+
+    elementA.download = fileName;
+    elementA.style.display = 'none';
+
+    const blob = new Blob([JSON.stringify(fileMsg)]);
+
+    elementA.href = URL.createObjectURL(blob);
+    document.body.appendChild(elementA);
+    elementA.click();
+    document.body.removeChild(elementA);
+  }
+
+
   //读取本地Excel表格
-function readWorkbookFromLocalFile(files: any) {
-  console.log(files)
-  var fileReader = new FileReader()
-  fileReader.readAsBinaryString(files[0])
-  return new Promise(function(resolve, reject) {
+  const readWorkbookFromLocalFile=(files: any) => {
+    var fileReader = new FileReader()
+    fileReader.readAsBinaryString(files[0])
+    return new Promise(function(resolve, reject) {
       fileReader.onload = function (ev: any) {
-          try {
-              var data = ev?.target.result
-              var workbook = XLSX.read(data, {
-                  type: 'binary'
-              }) // 以二进制流方式读取得到整份excel表格对象
-              var fromTo = '';
-              var sheetContent = []
-              // 遍历每张表读取
-              for (var sheet in workbook.Sheets) {
-                  if (workbook.Sheets.hasOwnProperty(sheet)) {
-                      fromTo = workbook.Sheets[sheet]['!ref'] || '';
-                      console.log(XLSX.utils.sheet_to_csv(workbook.Sheets[sheet]))
-                      sheetContent.push(XLSX.utils.sheet_to_json(workbook.Sheets[sheet]))
-                      console.log(sheetContent)
-                      break; // 如果只取第一张表，就取消注释这行
-                  }
-              }
-              const respondBody = {
-                  code: 100,
-                  msg: '文件解析成功',
-                  body: sheetContent
-              }
-              resolve(respondBody)
-          } catch (e) {
-              const respondBody = {
-                  code: 500,
-                  msg: '文件类型不正确',
-                  body: ''
-              }
-              reject(respondBody)
+        try {
+          var data = ev?.target.result
+          var workbook = XLSX.read(data, {
+            type: 'binary'
+          }) // 以二进制流方式读取得到整份excel表格对象
+          // var fromTo = '';
+          var sheetContent = []
+          // 遍历每张表读取
+          for (var sheet in workbook.Sheets) {
+            if (workbook.Sheets.hasOwnProperty(sheet)) {
+              // fromTo = workbook.Sheets[sheet]['!ref'] || '';
+              // console.log(XLSX.utils.sheet_to_json(workbook.Sheets[sheet]))
+              // const sheetStr = XLSX.utils.sheet_to_json(workbook.Sheets[sheet],{header:1})
+              sheetContent.push(XLSX.utils.sheet_to_json(workbook.Sheets[sheet],{raw:false}))
+              // console.log(sheetContent)
+              // let id = ''
+              let curVal = {}
+              const midList = sheetContent?.[0]?.map((val: any) => {
+                let midVal = val
+                if(val?.id) {
+                  curVal = val
+                  midVal = val
+                }
+                else {
+                  Object.keys(curVal).forEach((key: string) => {
+                    if(!val?.[`${key}`]) midVal[`${key}`] = curVal?.[key as keyof typeof curVal]
+                  })
+                  curVal = midVal
+                }
+                return midVal;
+              })
+              const finalList: any[] = []
+              let midFinalVal: any[] = []
+              let id = ''
+              midList.forEach((val: any)=>{
+                if(!id) {
+                  id = val?.id
+                  midFinalVal.push(val)
+                }
+                else if (val?.id===id) {
+                  midFinalVal.push(val)
+                }
+                else {
+                  let finalVal: any = midFinalVal?.[0]
+                  finalVal.id = id
+                  let a = midFinalVal?.[0]
+                  Object.keys(a)?.forEach((v: any)=>{
+                    const tList = midFinalVal?.filter((u: any)=>{
+                      return u?.[v as keyof typeof a] !== a[`${v}`]
+                    })
+                    if (!tList.length && !v?.includes('&&')) {
+                      finalVal[`${v}`] = a[`${v}`]
+                    }
+                    else {
+                      let l = midFinalVal?.map((u: any)=>{
+                        return u?.[v as keyof typeof a]
+                      })
+                      const finalV: string = v?.includes('&&') ? v?.split('&&')?.[0] : v
+                      finalVal[`${finalV}`] = l
+                      finalVal[`${v}`] = l
+                    }
+                  })
+                  finalList.push(finalVal)
+                  id = val?.id
+                  midFinalVal=[]
+                  midFinalVal.push(val)
+                }
+              })
+              let finalVal: any = midFinalVal?.[0]
+              finalVal.id = id
+              let a = midFinalVal?.[0]
+              Object.keys(a)?.forEach((v: any)=>{
+
+                const tList = midFinalVal?.filter((u: any)=>{
+                  return u?.[v as keyof typeof a] !== a[`${v}`]
+                })
+                if (!tList.length && !v?.includes('&&')) {
+                  finalVal[`${v}`] = a[`${v}`]
+                }
+                else {
+                  let l = midFinalVal?.map((u: any)=>{
+                    return u?.[v as keyof typeof a]
+                  })
+                  const finalV: string = v?.includes('&&') ? v?.split('&&')?.[0] : v
+                  finalVal[`${finalV}`] = l
+                  finalVal[`${v}`] = l
+                }
+              })
+              finalList.push(finalVal)
+              setTestSrc(finalList)
+              setOldKey(selectedKey);
+              setSelectedKey(undefined);
+              setShowModalDownload(true)
+              setFileList([])
+              // console.log(finalList)
+              break; // 如果只取第一张表，就取消注释这行
+            }
           }
+          const respondBody = {
+            code: 100,
+            msg: '文件解析成功',
+            body: sheetContent
+          }
+          resolve(respondBody)
+        } catch (e) {
+          const respondBody = {
+            code: 500,
+            msg: e,
+            body: ''
+          }
+          reject(respondBody)
+        }
       }
-  })
-}
+    })
+  }
+
+  const readTemplateFromLocalFile=(files: any) => {
+    var fileReader = new FileReader()
+    fileReader.readAsText(files[0])
+    return new Promise(function(resolve, reject) {
+      fileReader.onload = function (ev: any) {
+        try {
+          var data = ev?.target.result
+          // console.log(JSON.parse(data))
+          setContentList(JSON.parse(data))
+          setTemplateList([])
+          const respondBody = {
+            code: 100,
+            msg: '文件解析成功',
+            body: data
+          }
+          resolve(respondBody)
+        } catch (e) {
+          const respondBody = {
+            code: 500,
+            msg: e,
+            body: ''
+          }
+          reject(respondBody)
+        }
+      }
+    })
+  }
 
   const findKeys = () =>{
     const list : any[] = []
@@ -230,10 +355,15 @@ function readWorkbookFromLocalFile(files: any) {
         (val?.config?.text?.includes('&{') && val?.config?.text?.includes('}&')))
     })?.forEach((val: any) => {
       if(val?.config?.type === 'List') {
-        list.push({
-          val: 'List',
-          text: val?.config?.text,
-        })
+        let text = val?.config?.text;
+        while (text?.includes('&{') && text?.includes('}&')) {
+          text = text?.slice(text?.indexOf('&{') + 2);
+          list.push({
+            val: 'List',
+            text:text?.split('}&')?.[0],
+          })
+          text = text?.slice(text?.indexOf('}&') + 2);
+        }
       }
       else {
         let text = val?.config?.text;
@@ -263,20 +393,6 @@ function readWorkbookFromLocalFile(files: any) {
 
   return (
     <>
-    <div>
-      <Upload
-        action='/' 
-        fileList={fileList}
-        onChange={(files: any)=>{
-          console.log(files)
-          setFileList(files);
-        }}
-        autoUpload={false}
-      />
-    </div>
-    <div style={{marginTop: 24}}><button onClick={()=>{readWorkbookFromLocalFile(fileList.map((val: any)=>{
-      return val?.originFile
-    }))}}>111</button></div>
     <div style={{ background: '#F2F2F2', height: '750px', marginTop: 24 }}>
       <Row>
         <Col span={7}>
@@ -353,6 +469,34 @@ function readWorkbookFromLocalFile(files: any) {
             />
           </div>
           <div style={{ textAlign: 'center' }}>
+          <Dropdown droplist={(
+              <Menu >
+                <Menu.Item key='1'>
+                  <Upload
+                    limit={1}
+                    action='/' 
+                    fileList={templateList}
+                    onChange={(files: any)=>{
+                      setTemplateList(files);
+                      readTemplateFromLocalFile(files.map((val: any)=>{
+                        return val?.originFile
+                      }))
+                    }}
+                    autoUpload={false}
+                  ><Button type='text'>模板</Button></Upload>
+                </Menu.Item>
+              </Menu>
+              )}
+              position='top'
+              unmountOnExit={false}
+            >
+              <Button
+                type="outline"
+                style={{ marginRight: 20 }}
+                size="large">
+                导入
+              </Button>
+            </Dropdown>
             <Button
               type="outline"
               style={{ marginRight: 20 }}
@@ -365,7 +509,43 @@ function readWorkbookFromLocalFile(files: any) {
               size="large">
               预览
             </Button>
-            <Button
+            <Dropdown droplist={(
+              <Menu >
+                <Menu.Item key='1'>
+                  <Button type='text'
+                    onClick={()=>{
+                      downloadTemplate("模板.txt",contentList)
+                    }}
+                  >模板</Button>
+                </Menu.Item>
+                <Menu.Item key='2'>
+                  <Upload
+                    limit={1}
+                    action='/' 
+                    fileList={fileList}
+                    onChange={(files: any)=>{
+                      setFileList(files);
+                      readWorkbookFromLocalFile(files.map((val: any)=>{
+                        return val?.originFile
+                      }))
+                    }}
+                    autoUpload={false}
+                  ><Button type='text'>图片</Button></Upload>
+                </Menu.Item>
+              </Menu>
+              )}
+              position='top'
+              unmountOnExit={false}
+            >
+              <Button
+                type="primary"
+                status="success"
+                style={{ marginRight: 20 }}
+                size="large">
+                保存
+              </Button>
+            </Dropdown>
+            {/* <Button
               type="primary"
               status="success"
               style={{ marginRight: 20 }}
@@ -377,7 +557,7 @@ function readWorkbookFromLocalFile(files: any) {
               }}
               size="large">
               保存
-            </Button>
+            </Button> */}
           </div>
         </Col>
       </Row>
@@ -412,6 +592,8 @@ function readWorkbookFromLocalFile(files: any) {
       testChange={testChange}
       setTestChange={setTestChange}
       downloadCanvas={downloadCanvas}
+      testSrc={testSrc}
+      setTestSrc={setTestSrc}
     />
     </>
   );

@@ -2,7 +2,6 @@ import { Grid, Input, Modal, Divider, Select, InputNumber, Button } from '@arco-
 import { IconCheck, IconLeft, IconRight } from '@arco-design/web-react/icon';
 import React, { useEffect, useState } from 'react'
 import styled from 'styled-components';
-import { testSrc } from './constant';
 
 const { Row, Col } = Grid;
 const { Option } = Select;
@@ -29,6 +28,8 @@ const DownloadModal = (
 	testChange,
   setTestChange,
   downloadCanvas,
+  testSrc,
+  setTestSrc,
 }:
 {
   showModal: any;
@@ -45,6 +46,8 @@ const DownloadModal = (
 	testChange: any;
   setTestChange: any;
   downloadCanvas: any;
+  testSrc: any;
+  setTestSrc: any;
 }
 ) => {
 	const [imgNum, setImgNum] = useState<number>(0)
@@ -83,7 +86,16 @@ const DownloadModal = (
         //     num = num + 1
         //   }
         // }
-        downloadCanvas()
+        if(canvasDownloadList?.length!==testSrc?.length) {
+          Modal.confirm({
+            title: '确认下载',
+            content:(<div style={{textAlign:'center'}}>目前只加载了{canvasDownloadList?.length||0}/{testSrc?.length||0}张图片，是否直接保存？</div>),
+            onOk: () => {
+              downloadCanvas()
+            },
+          });
+        }
+        
       }}
 			afterOpen={()=>{
         setImgNum(0)
