@@ -3,6 +3,24 @@ import '../index.css';
 
 const MyList = ({ config,testData, }: { config: any; testData: any }) => {
 	const [deltaHeight, setDeltaHeight] = useState<any>(0);
+  const getTextWidth = (str: any,fontSize: any) =>{
+		let result = 10;
+
+		let ele = document.createElement('span')
+		//字符串中带有换行符时，会被自动转换成<br/>标签，若需要考虑这种情况，可以替换成空格，以获取正确的宽度
+        //str = str.replace(/\\n/g,' ').replace(/\\r/g,' ');
+		ele.innerText = str;
+		//不同的大小和不同的字体都会导致渲染出来的字符串宽度变化，可以传入尽可能完备的样式信息
+		ele.style.fontSize = fontSize; 
+		
+		//由于父节点的样式会影响子节点，这里可按需添加到指定节点上
+		document.documentElement.append(ele);
+
+		result =  ele.offsetWidth;
+
+		document.documentElement.removeChild(ele);
+		return result;
+	}
 	useEffect(() => {
 		
 		const myList = document.getElementById('my-list')
@@ -30,7 +48,8 @@ const MyList = ({ config,testData, }: { config: any; testData: any }) => {
 					style={{ 
 						wordBreak: 'break-all', 
 						...config?.style, 
-						marginTop:config?.TopBottom === 'Bottom'? deltaHeight :'unset' 
+						marginTop:config?.TopBottom === 'Bottom'? deltaHeight :'unset',
+            whiteSpace:'nowrap',
 					}}
 				>
 					<div>List</div>
@@ -47,7 +66,8 @@ const MyList = ({ config,testData, }: { config: any; testData: any }) => {
 					style={{ 
 						wordBreak: 'break-all', 
 						...config?.style, 
-						marginTop:config?.TopBottom === 'Bottom'? deltaHeight :'unset' 
+						marginTop:config?.TopBottom === 'Bottom'? deltaHeight :'unset',
+            whiteSpace:'nowrap',
 					}}
 				>
 					<div>List</div>
@@ -77,13 +97,18 @@ const MyList = ({ config,testData, }: { config: any; testData: any }) => {
           style={{ 
             wordBreak: 'break-all', 
             ...config?.style, 
-            marginTop:config?.TopBottom === 'Bottom'? deltaHeight :'unset' 
-          }}
+            marginTop:config?.TopBottom === 'Bottom'? deltaHeight :'unset',
+            whiteSpace:'nowrap',
+        }}
         >
-          <div>Data1</div>
-          <div>Data2</div>
-          <div>Data3</div>
-          <div>Data4</div>
+          {[1,2,3,4].map((val: any)=>{
+            const rate = config?.width?.split('px')?.[0] / getTextWidth(`Data${val}`,config?.style?.fontSize+'px')
+            // const rate = document.getElementById(`Data${val}`)?.style.width
+            // console.log(getTextWidth(`Data${val}`,config?.style?.fontSize+'px'),rate,config?.width?.split('px')?.[0])
+            const finalRate = rate < 1 ? rate : 1
+            const transparent = (1-finalRate) * config?.width?.split('px')?.[0] / 2
+            return <div style={{transform:`matrix(${finalRate},0,0,1,-${transparent},0)`}}><span>Data{val}</span></div>
+          })}
         </div>
       );
 		}
@@ -94,7 +119,8 @@ const MyList = ({ config,testData, }: { config: any; testData: any }) => {
 				style={{ 
 					wordBreak: 'break-all', 
 					...config?.style, 
-					marginTop:config?.TopBottom === 'Bottom'? deltaHeight :'unset' 
+					marginTop:config?.TopBottom === 'Bottom'? deltaHeight :'unset' ,
+          whiteSpace:'nowrap',
 				}}
 			>
 				{/* <div style={{bottom:0, position:'absolute'}}> */}
@@ -108,7 +134,10 @@ const MyList = ({ config,testData, }: { config: any; testData: any }) => {
             text = text?.slice(text?.indexOf('}&') + 2);
           }
           finalText += text;
-						return <div>{finalText}</div>
+					const rate = config?.width?.split('px')?.[0] / getTextWidth(`${finalText}`,config?.style?.fontSize+'px')
+          const finalRate = rate < 1 ? rate : 1
+          const transparent = (1-finalRate) * config?.width?.split('px')?.[0] / 2
+          return <div style={{transform:`matrix(${finalRate},0,0,1,-${transparent},0)`}}><span>{finalText}</span></div>
 				})}
 				{/* </div> */}
       </div>
@@ -122,13 +151,18 @@ const MyList = ({ config,testData, }: { config: any; testData: any }) => {
       style={{ 
         wordBreak: 'break-all', 
         ...config?.style, 
-        marginTop:config?.TopBottom === 'Bottom'? deltaHeight :'unset' 
+        marginTop:config?.TopBottom === 'Bottom'? deltaHeight :'unset',
+        whiteSpace:'nowrap' 
       }}
     >
-      <div>Data1</div>
-      <div>Data2</div>
-      <div>Data3</div>
-      <div>Data4</div>
+      {[1,2,3,4].map((val: any)=>{
+        const rate = config?.width?.split('px')?.[0] / getTextWidth(`Data${val}`,config?.style?.fontSize+'px')
+        // const rate = document.getElementById(`Data${val}`)?.style.width
+        // console.log(getTextWidth(`Data${val}`,config?.style?.fontSize+'px'),rate,config?.width?.split('px')?.[0])
+        const finalRate = rate < 1 ? rate : 1
+        const transparent = (1-finalRate) * config?.width?.split('px')?.[0] / 2
+        return <div style={{transform:`matrix(${finalRate},0,0,1,-${transparent},0)`}}><span>Data{val}</span></div>
+      })}
     </div>
   )
 };

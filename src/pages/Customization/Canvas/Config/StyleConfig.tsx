@@ -15,6 +15,8 @@ const StyleConfig = ({
   form,
   onConfigChange,
   canvasStyle,
+  fontList,
+  setFontList,
 }: {
   // selectedKey: any;
   contentList: any;
@@ -23,6 +25,8 @@ const StyleConfig = ({
   form: any;
   onConfigChange: any;
   canvasStyle: any;
+  fontList: any;
+  setFontList: any;
 }) => {
   if (contentList[selectedIndex]?.config?.type === 'Image') {
     return (
@@ -40,6 +44,8 @@ const StyleConfig = ({
         onConfigChange={onConfigChange}
         form={form}
         detail={contentList[selectedIndex]?.config}
+        fontList={fontList}
+        setFontList={setFontList}
       />
     );
   } else if (contentList[selectedIndex]?.config?.type === 'QRCode') {
@@ -55,6 +61,8 @@ const StyleConfig = ({
         onConfigChange={onConfigChange}
         form={form}
         detail={contentList[selectedIndex]?.config}
+        fontList={fontList}
+        setFontList={setFontList}
       />
     );
   } else {

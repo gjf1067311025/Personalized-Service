@@ -1,8 +1,16 @@
-import { Checkbox, Form, Grid, Input, InputNumber } from '@arco-design/web-react';
-import React, { useState } from 'react';
+import { Button, Checkbox, Form, Grid, Input, InputNumber, Upload } from '@arco-design/web-react';
+import { IconUpload } from '@arco-design/web-react/icon';
+import React, { useEffect, useState } from 'react';
+import styled from 'styled-components';
 
 const FormItem = Form.Item;
 const { Row, Col } = Grid;
+
+const StyledInput = styled(Input)`
+  .arco-input-inner-wrapper{
+    padding-right: 0px;
+  }
+`;
 
 const ImageStyle = ({
   // form,
@@ -17,6 +25,39 @@ const ImageStyle = ({
 }) => {
   const [widthDisable, setWidthDisable] = useState<boolean>(false);
   const [heightDisable, setHeightDisable] = useState<boolean>(false);
+  const [imageList, setImageList] = useState<any>([]);
+
+  useEffect(()=>{
+    setWidthDisable(detail?.width===canvasStyle.width)
+    setHeightDisable(detail?.height===canvasStyle.height)
+  },[detail])
+
+  const readImageFromLocalFile=(files: any) => {
+    var fileReader = new FileReader()
+    fileReader.readAsDataURL(files[0])
+    return new Promise(function(resolve, reject) {
+        fileReader.onload = function (ev: any) {
+            try {
+                var data = ev?.target.result
+                // console.log(data)
+                onConfigChange('image_url', data, false);
+                const respondBody = {
+                    code: 100,
+                    msg: '文件解析成功',
+                    body: data
+                }
+                resolve(respondBody)
+            } catch (e) {
+                const respondBody = {
+                    code: 500,
+                    msg: '文件类型不正确',
+                    body: ''
+                }
+                reject(respondBody)
+            }
+        }
+    })
+  }
 
   return (
     <>
@@ -25,17 +66,39 @@ const ImageStyle = ({
           <FormItem
             label="图片来源"
             style={{ marginTop: '10px' }}
-            field="image_url">
-            <Input
-              placeholder='请粘贴图片地址'
+            field="">
+            <StyledInput
+              value={detail?.image_url}
+              placeholder='粘贴url或上传本地图片'
               style={{ width: '90%' }}
               onChange={(val: any) => {
+                if(!val) setImageList([])
                 onConfigChange('image_url', val, false);
               }}
+              allowClear={true}
+              suffix={
+                <Upload
+                  disabled={imageList?.length}
+                  action='/' 
+                  fileList={imageList}
+                  onChange={(images: any)=>{
+                    // console.log(files)
+                    setImageList(images);
+                    readImageFromLocalFile(images.map((val: any)=>{
+                      return val?.originFile
+                    }))
+                  }}
+                  autoUpload={false}
+                  showUploadList={false}
+                >
+                  <Button type='primary' style={{padding: '0 10px'}}>
+                    <IconUpload />
+                  </Button>
+                </Upload>
+              }
             />
           </FormItem>
         </Col>
-
         <Col span={12}>
           <FormItem
             labelCol={{ span: 12 }}
@@ -78,7 +141,7 @@ const ImageStyle = ({
             <InputNumber
               value={detail?.width?.split('px')[0]}
               style={{ width: '80%' }}
-              disabled={widthDisable}
+              // disabled={widthDisable}
               onChange={(val: any) => {
                 onConfigChange('width', 
                   val>canvasStyle?.width?.split('px')[0]?canvasStyle?.width:`${val}px`,
@@ -89,7 +152,9 @@ const ImageStyle = ({
           </FormItem>
         </Col>
         <Col span={12}>
-          <Checkbox onChange={(checked: any) =>{
+          <Checkbox
+            checked={canvasStyle?.width===detail?.width}
+            onChange={(checked: any) =>{
             if (checked) {
               onConfigChange('width', canvasStyle?.width, false);
               setWidthDisable(true)
@@ -106,7 +171,7 @@ const ImageStyle = ({
             <InputNumber
               value={detail?.height?.split('px')[0]}
               style={{ width: '80%' }}
-              disabled={heightDisable}
+              // disabled={heightDisable}
               onChange={(val: any) => {
                 onConfigChange('height', 
                   val>canvasStyle?.height?.split('px')[0]?canvasStyle?.height:`${val}px`,
@@ -117,7 +182,9 @@ const ImageStyle = ({
           </FormItem>
         </Col>
         <Col span={12}>
-          <Checkbox onChange={(checked: any) =>{
+          <Checkbox
+            checked={canvasStyle?.height===detail?.height}
+            onChange={(checked: any) =>{
             if (checked) {
               onConfigChange('height', canvasStyle?.height, false);
               setHeightDisable(true)

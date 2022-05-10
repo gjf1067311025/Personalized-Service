@@ -1,5 +1,5 @@
 import { Divider, Form, Input, Tabs } from '@arco-design/web-react';
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import styled from 'styled-components';
 import StyleConfig from './StyleConfig';
 
@@ -45,6 +45,20 @@ const Config = ({
   canvasStyle: any;
 }) => {
   const [form] = Form.useForm();
+  const [fontList, setFontList] = useState<any[]>([]);
+  useEffect(()=>{
+    let l = []
+    let values=document.fonts.values();
+    let item=values.next();
+    while(!item.done)
+    {
+        let fontFace=item.value;
+        // console.log(fontFace.family)
+        l.push(fontFace)
+        item=values.next();
+    }
+    // setFontList(l)
+  },[])
 
   useEffect(() => {
     // console.log(contentList[selectedIndex]?.config);
@@ -89,14 +103,16 @@ const Config = ({
                 form={form}
                 onConfigChange={onConfigChange}
                 canvasStyle={canvasStyle}
+                fontList={fontList}
+                setFontList={setFontList}
               />
             </div>
           </TabPane>
-          <TabPane key="2" title="配置">
+          {/* <TabPane key="2" title="配置">
             <div style={{ textAlign: 'center', marginTop: 20 }}>
               Content of Tab Panel 2
             </div>
-          </TabPane>
+          </TabPane> */}
         </StyledTabs>
         <Divider style={{ margin: 0 }} />
       </StyledForm>
