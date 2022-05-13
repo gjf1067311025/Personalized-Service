@@ -30,6 +30,7 @@ const DownloadModal = (
   downloadCanvas,
   testSrc,
   setTestSrc,
+  draw,
 }:
 {
   showModal: any;
@@ -48,6 +49,7 @@ const DownloadModal = (
   downloadCanvas: any;
   testSrc: any;
   setTestSrc: any;
+  draw: any;
 }
 ) => {
 	const [imgNum, setImgNum] = useState<number>(0)
@@ -86,16 +88,14 @@ const DownloadModal = (
         //     num = num + 1
         //   }
         // }
-        if(canvasDownloadList?.length!==testSrc?.length) {
-          Modal.confirm({
-            title: '确认下载',
-            content:(<div style={{textAlign:'center'}}>目前只加载了{canvasDownloadList?.length||0}/{testSrc?.length||0}张图片，是否直接保存？</div>),
-            onOk: () => {
-              downloadCanvas()
-            },
-          });
-        }
-        
+        // Modal.confirm({
+        //   title: '确认下载',
+        //   content:(<div style={{textAlign:'center'}}>目前加载了{canvasDownloadList?.length||0}/{testSrc?.length||0}张图片，是否直接保存？</div>),
+        //   onOk: () => {
+        //     downloadCanvas()
+        //   },
+        // });
+        draw()
       }}
 			afterOpen={()=>{
         setImgNum(0)
@@ -112,7 +112,7 @@ const DownloadModal = (
       style={{textAlign:'center'}}
       unmountOnExit={true}
     >
-      <Row align='center' style={{height: 550}}>
+      <Row align='center' style={{height: 540}}>
         <Col span={2}>
         	<Button
 						disabled={imgNum===0}
@@ -146,6 +146,9 @@ const DownloadModal = (
 						<IconRight />
 					</Button>
 				</Col>
+        <Col span={24}>
+          {imgNum+1||0}/{testSrc?.length||0}
+        </Col>
       </Row>
     </StyledModal>)
 }

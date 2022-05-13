@@ -30,3 +30,6 @@ export const GetItemByKey = async (params: any) =>
 
 export const JudgeExist = async (params: any) =>
   await get(baseUrl+`/api/starling/key`, params /* 判断是否有重复key */);
+
+export const GetNewData = async (url: string) =>
+  await get(url, {} /* 用外部url */)

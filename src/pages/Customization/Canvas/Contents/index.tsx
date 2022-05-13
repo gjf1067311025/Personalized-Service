@@ -14,6 +14,7 @@ const Contents = ({
   setSelectedKey,
   canvasStyle,
   testData,
+  father,
 }: {
   contentList: any[];
   setContentList: any;
@@ -21,6 +22,7 @@ const Contents = ({
   setSelectedKey: any;
   canvasStyle: any;
   testData: any;
+  father?: any;
 }) => {
   window.addEventListener('click', (e: any) => {
     const id = e?.target?.id || e?.target?.offsetParent?.id;
@@ -198,7 +200,7 @@ const Contents = ({
           background: 'white',
           ...canvasStyle,
         }}
-        id="father">
+        id={father?`father${father}`:"father"}>
         {[...contentList]?.map((val: any) => {
           return (
             <div
