@@ -1,10 +1,10 @@
-import { Button, Dropdown, Grid, Menu, Select, Upload } from '@arco-design/web-react';
-import React, { FC, useEffect, useState } from 'react';
+import { Button, Dropdown, Grid, Input, Menu, Modal, Select, Upload } from '@arco-design/web-react';
+import React, { FC, ReactNode, useEffect, useState } from 'react';
 import { useHistory } from 'react-router-dom';
 import styled from 'styled-components';
 import html2canvas from 'html2canvas';
 import Config from './Config';
-import { canvansList } from './constant';
+import { canvansList, ownSrc } from './constant';
 import Contents from './Contents';
 import Tools from './Tools';
 import CanvasModal from './CanvasModal';
@@ -13,6 +13,10 @@ import DownloadModal from './DownloadModal';
 import JSZip from 'jszip'
 import { saveAs } from 'file-saver'
 import * as XLSX from 'xlsx'
+import { IconCheck } from '@arco-design/web-react/icon';
+import { GetNewData } from '../../../apis';
+import ReactDOM from 'react-dom';
+import ShowContent from './Contents/ShowContent';
 
 const StyledSelect = styled(Select)`
   .arco-select-view {
@@ -34,6 +38,8 @@ const Canvas: FC = () => {
   const [selectedIndex, setSelectedIndex] = useState<any>();
   const [showModal, setShowModal] = useState<boolean>(false);
   const [showModalDownload, setShowModalDownload] = useState<boolean>(false);
+  const [showModalChoose, setShowModalChoose] = useState<boolean>(false);
+  const [urlText, setUrlText] = useState<any>();
   const [canvasSrc, setCanvasSrc] = useState<any>();
   const [canvasStyle, setCanvasStyle] = useState<any>({
     width: '595px',
@@ -46,7 +52,9 @@ const Canvas: FC = () => {
   const [canvasDownloadList, setCanvasDownloadList] = useState<any[]>([]);
   const [fileList, setFileList] = useState<any>([])
   const [templateList, setTemplateList] = useState<any>([])
-  const [testSrc, setTestSrc] = useState<any[]>([])
+  const [testSrc, setTestSrc] = useState<any[]>(ownSrc || [])
+  const [buttonDisable, setButtonDisable] = useState<boolean>(false)
+  let promiseNum : number = 0
 
   const DPR = () => {
     if (window.devicePixelRatio && window.devicePixelRatio > 1) {
@@ -153,7 +161,13 @@ const Canvas: FC = () => {
       let request = new XMLHttpRequest()
       request.open("GET", url, true)
       request.responseType = "blob"
+      const number = document?.getElementById('showNumber');
       request.onload = (res: any) => {
+        promiseNum += 1
+        if(number) {
+          number.innerHTML=`图片转换中,请稍作等待，${promiseNum} / ${testSrc?.length}`
+        }
+        // console.log(promiseNum,'out')
         if (res.target.status === 200) {
             resolve(res.target.response)
         } else {
@@ -164,21 +178,46 @@ const Canvas: FC = () => {
     })
   }
 
-  const downloadCanvas = () => {
+  const downloadCanvas = (list?: any) => {
+    
     const zip = new JSZip()
     let result = []
-    const files = canvasDownloadList
+    const files = list || canvasDownloadList
     for (let i in files) {
-      let promise = getFileBlob(files[i]).then((res: any) => {
-        const file_name = `${testData?.id || '图片'}.png`;
+      let promise = getFileBlob(files[i]?.url).then((res: any) => {
+        const file_name = `${files[i]?.id || '图片'}.png`;
         zip.file(file_name, res, { binary: true })
       })
       result.push(promise)
     }
+    console.log('start promise')
     Promise.all(result).then(() => {
+      const number = document?.getElementById('showNumber');
+
+      if(number) {
+        number.innerHTML="打包中，这个过程往往需要几分钟"
+      }
       zip.generateAsync({ type: "blob" }).then((res) => {
-          saveAs(res, "文件.zip")
+          const elementA = document.createElement('a');
+
+          elementA.download = '文件.zip';
+          elementA.style.display = 'none';
+
+          const blob = new Blob([res]);
+
+          elementA.href = URL.createObjectURL(blob);
+          document.body.appendChild(elementA);
+          elementA.click();
+          document.body.removeChild(elementA);
+          // await saveAs(res, "文件.zip")
+          if(number) {
+            number.innerHTML="确认生成图片/证书"
+          }
+          setButtonDisable(false)
+          setShowModalDownload(false)
       })
+      
+      
     })
   }
 
@@ -296,6 +335,7 @@ const Canvas: FC = () => {
               setOldKey(selectedKey);
               setSelectedKey(undefined);
               setShowModalDownload(true)
+              setShowModalChoose(false)
               setFileList([])
               // console.log(finalList)
               break; // 如果只取第一张表，就取消注释这行
@@ -390,6 +430,75 @@ const Canvas: FC = () => {
     setSelectedIndex(ind);
   }, [selectedKey]);
 
+
+  const draw = async () => {
+    console.log('start downloading')
+    const images: any[] = []
+    for(let index=0; index< testSrc.length; index++) {
+      let val = testSrc[index]
+      const number = document?.getElementById('showNumber');
+      const div = document?.createElement('div');
+      div.id = 'myDiv';
+      div.style.width=canvasStyle?.width
+      div.style.height=canvasStyle?.height
+      document.querySelector("#root")?.appendChild(div);
+      ReactDOM.render(
+        <ShowContent
+          contentList={contentList}
+          canvasStyle={canvasStyle}
+          testData={val}
+          father={index+1}
+        />,
+        div
+      );
+      console.log(`finish render ${index}`)
+      if (number) {
+        number.innerHTML = `${images?.length?`${images?.length} / ${testSrc?.length}` : '正在加载数据中'}`;
+      }
+      const dom = document.getElementById(`father${index+1}`);
+      if(dom) {
+        const box = window.getComputedStyle(dom);
+        // DOM 节点计算后宽高
+        const width = parseValue(box.width);
+        const height = parseValue(box.height);
+        // 获取像素比-防止模糊
+        const scaleBy = DPR();
+        // 创建自定义 canvas 元素
+        const canvas = document.createElement('canvas');
+
+        // 设定 canvas 元素属性宽高为 DOM 节点宽高 * 像素比
+        canvas.width = width * scaleBy;
+        canvas.height = height * scaleBy;
+        // 设定 canvas css宽高为 DOM 节点宽高
+        canvas.style.width = `${width}px`;
+        canvas.style.height = `${height}px`;
+        const context = canvas.getContext('2d');
+        // console.log(a)
+        if (context) {
+          // 将所有绘制内容放大像素比倍
+          // context.scale(scaleBy, scaleBy);
+          // 将自定义 canvas 作为配置项传入，开始绘制
+          // console.log(div, 222);
+          const canvasAll = await html2canvas(dom, {
+            canvas,
+            allowTaint: true,
+            useCORS: true,
+            scrollX: 0,
+            scrollY: 0,
+          })
+          // document.querySelector("#root")?.appendChild(canvas);
+          // console.log(canvasAll.toDataURL('image/png'));
+          document.querySelector("#root")?.removeChild(div);
+          images.push({id:val?.id,url:canvasAll.toDataURL('image/png')});
+          // downloadList.push(canvasAll.toDataURL('image/png'))
+          // console.log(images)
+          if(images.length===testSrc.length) {
+            downloadCanvas(images)
+          }
+        }
+      }
+    }
+  }
 
   return (
     <>
@@ -519,18 +628,9 @@ const Canvas: FC = () => {
                   >模板</Button>
                 </Menu.Item>
                 <Menu.Item key='2'>
-                  <Upload
-                    limit={1}
-                    action='/' 
-                    fileList={fileList}
-                    onChange={(files: any)=>{
-                      setFileList(files);
-                      readWorkbookFromLocalFile(files.map((val: any)=>{
-                        return val?.originFile
-                      }))
-                    }}
-                    autoUpload={false}
-                  ><Button type='text'>图片</Button></Upload>
+                  <Button type='text' onClick={()=>{
+                    setShowModalChoose(true)
+                  }}>图片</Button>
                 </Menu.Item>
               </Menu>
               )}
@@ -577,7 +677,7 @@ const Canvas: FC = () => {
       drawCanvas={drawCanvas}
       // setOldKet={setOldKey}
     />
-    <DownloadModal
+    {/* <DownloadModal
       showModal={showModalDownload}
       setShowModal={setShowModalDownload}
       canvasSrc={canvasSrc}
@@ -594,7 +694,79 @@ const Canvas: FC = () => {
       downloadCanvas={downloadCanvas}
       testSrc={testSrc}
       setTestSrc={setTestSrc}
-    />
+      draw={draw}
+    /> */}
+    <Modal
+      title="请选择数据来源"
+      visible={showModalChoose}
+      onCancel={()=>{
+        setShowModalChoose(false)
+        setUrlText('')
+      }}
+      footer={null}
+    >
+      <Row>
+        <Col span={18}>
+          <Input 
+            placeholder='选择后端数据，请输入url'
+            value={urlText} 
+            onChange={(val: any)=>{
+              setUrlText(val)
+            }}
+            allowClear={true}
+            style={{marginBottom: 10, padding: 0}}
+            suffix={
+              <IconCheck
+                style={{cursor:'pointer', color:'#165dff'}}
+                onClick={async ()=>{
+                  const data = await GetNewData(urlText)
+                  console.log(data)
+                  setTestSrc(data)
+                  setOldKey(selectedKey);
+                  setSelectedKey(undefined);
+                  setShowModalDownload(true)
+                  setShowModalChoose(false)
+                }}
+              />
+            }
+          />
+        </Col>
+        <Col offset={1} span={4}>
+          <Upload
+            limit={1}
+            action='/' 
+            fileList={fileList}
+            onChange={(files: any)=>{
+              setFileList(files);
+              readWorkbookFromLocalFile(files.map((val: any)=>{
+                return val?.originFile
+              }))
+            }}
+            autoUpload={false}
+          ><Button type='primary'>选择Excel</Button></Upload>
+        </Col>
+      </Row>
+    </Modal>
+    <Modal
+      title="生成图片"
+      visible={showModalDownload}
+      closable={false}
+      escToExit={false}
+      maskClosable={false}
+      onCancel={()=>{
+        setShowModalDownload(false)
+      }}
+      cancelButtonProps={{disabled: buttonDisable }}
+      okButtonProps={{disabled: buttonDisable}}
+      onOk={async ()=>{
+        setButtonDisable(true)
+        await draw()
+      }}
+    >
+      <div style={{textAlign:'center'}}>保存期间不可中断，请先保存模板</div>
+      <div id="showNumber" style={{textAlign:'center'}}>确认生成图片/证书</div>
+    </Modal>
+    
     </>
   );
 };
