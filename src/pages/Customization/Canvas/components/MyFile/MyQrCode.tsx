@@ -10,15 +10,16 @@ const MyQrCode = ({ config,testData, }: { config: any; testData: any }) => {
   //     className="my-qrcode"
   //     src={testData?.[config?.image_url as keyof typeof testData] || avatarDef}
   //     draggable={false}></img>
-  // <div className='my-qrcode'>
+  <div className='my-qrcode'>
     <QRCode
       // className="my-qrcode"
       value={testData?.[config?.image_url as keyof typeof testData]}
-      // value={`${detail.uniqueKey}`}
+      // value={`222`}
       size={Number(config?.width?.split('px')?.[0])}
       fgColor="#000000" //二维码的颜色
+      renderAs='svg'
     />
-  // </div>
+  </div>
   
   );
 };
