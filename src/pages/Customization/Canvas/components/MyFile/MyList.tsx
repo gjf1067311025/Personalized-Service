@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import '../index.css';
 
 const MyList = ({ config,testData, }: { config: any; testData: any }) => {
-	const [deltaHeight, setDeltaHeight] = useState<any>(0);
+	// const [getDeltaHeight(), setDeltaHeight] = useState<any>(0);
   const getTextWidth = (str: any,fontSize: any) =>{
 		let result = 10;
 
@@ -21,15 +21,26 @@ const MyList = ({ config,testData, }: { config: any; testData: any }) => {
 		document.documentElement.removeChild(ele);
 		return result;
 	}
-	useEffect(() => {
+	const getDeltaHeight = () => {
 		
 		const myList = document.getElementById('my-list')
+		const listChild = document.getElementById('list-child')
 		const listFather = myList?.parentElement
-		if(myList && listFather && listFather?.offsetHeight-myList?.offsetHeight>0) {
-			setDeltaHeight(listFather?.offsetHeight-myList?.offsetHeight)
+    let text = config?.text
+    let str = ''
+    if (text?.includes('&{') && text?.includes('}&')) {
+      // str = text?.slice(text?.indexOf('&{') + 2).split('}&')?.[0]
+      text = text?.slice(text?.indexOf('&{') + 2);
+      str += text?.split('}&')?.[0]
+      text = text?.slice(text?.indexOf('}&') + 2);
+    };
+    const finalList = testData?.[str as keyof typeof testData] || []
+    
+		if(myList && listFather && listChild && listFather?.offsetHeight-myList?.offsetHeight>0) {
+			return listFather?.offsetHeight-listChild?.offsetHeight*(finalList?.length || 4)
 		}
-		else setDeltaHeight(0)
-	},[config.height])
+		else return 0
+	}
 
   if (config?.text !== "List") {
     let text = config?.text
@@ -48,7 +59,7 @@ const MyList = ({ config,testData, }: { config: any; testData: any }) => {
 					style={{ 
 						wordBreak: 'break-all', 
 						...config?.style, 
-						marginTop:config?.TopBottom === 'Bottom'? deltaHeight :'unset',
+						marginTop:config?.TopBottom === 'Bottom'? getDeltaHeight() :'unset',
             whiteSpace:'nowrap',
 					}}
 				>
@@ -66,7 +77,7 @@ const MyList = ({ config,testData, }: { config: any; testData: any }) => {
 					style={{ 
 						wordBreak: 'break-all', 
 						...config?.style, 
-						marginTop:config?.TopBottom === 'Bottom'? deltaHeight :'unset',
+						marginTop:config?.TopBottom === 'Bottom'? getDeltaHeight() :'unset',
             whiteSpace:'nowrap',
 					}}
 				>
@@ -83,7 +94,7 @@ const MyList = ({ config,testData, }: { config: any; testData: any }) => {
 			// 		style={{ 
 			// 			wordBreak: 'break-all', 
 			// 			...config?.style, 
-			// 			marginTop:config?.TopBottom === 'Bottom'? deltaHeight :'unset' 
+			// 			marginTop:config?.TopBottom === 'Bottom'? getDeltaHeight() :'unset' 
 			// 		}}
 			// 	>
 			// 		<div>List</div>
@@ -97,7 +108,7 @@ const MyList = ({ config,testData, }: { config: any; testData: any }) => {
           style={{ 
             wordBreak: 'break-all', 
             ...config?.style, 
-            marginTop:config?.TopBottom === 'Bottom'? deltaHeight :'unset',
+            marginTop:config?.TopBottom === 'Bottom'? getDeltaHeight() :'unset',
             whiteSpace:'nowrap',
         }}
         >
@@ -107,7 +118,7 @@ const MyList = ({ config,testData, }: { config: any; testData: any }) => {
             // console.log(getTextWidth(`Data${val}`,config?.style?.fontSize+'px'),rate,config?.width?.split('px')?.[0])
             const finalRate = rate < 1 ? rate : 1
             const transparent = (1-finalRate) * config?.width?.split('px')?.[0] / 2
-            return <div style={{transform:`matrix(${finalRate},0,0,1,-${transparent},0)`}}><span>Data{val}</span></div>
+            return <div id='list-child' style={{transform:`matrix(${finalRate},0,0,1,-${transparent},0)`}}><span>Data{val}</span></div>
           })}
         </div>
       );
@@ -119,12 +130,13 @@ const MyList = ({ config,testData, }: { config: any; testData: any }) => {
 				style={{ 
 					wordBreak: 'break-all', 
 					...config?.style, 
-					marginTop:config?.TopBottom === 'Bottom'? deltaHeight :'unset' ,
+					marginTop:config?.TopBottom === 'Bottom'? getDeltaHeight() :'unset' ,
           whiteSpace:'nowrap',
 				}}
 			>
 				{/* <div style={{bottom:0, position:'absolute'}}> */}
 				{finalList.map((val: any) => {
+          // console.log(getDeltaHeight())
           let text = config?.text;
           let finalText = '';
           if (text?.includes('&{') && text?.includes('}&')) {
@@ -137,7 +149,7 @@ const MyList = ({ config,testData, }: { config: any; testData: any }) => {
 					const rate = config?.width?.split('px')?.[0] / getTextWidth(`${finalText}`,config?.style?.fontSize+'px')
           const finalRate = rate < 1 ? rate : 1
           const transparent = (1-finalRate) * config?.width?.split('px')?.[0] / 2
-          return <div style={{transform:`matrix(${finalRate},0,0,1,-${transparent},0)`}}><span>{finalText}</span></div>
+          return <div id='list-child' style={{transform:`matrix(${finalRate},0,0,1,-${transparent},0)`}}><span>{finalText}</span></div>
 				})}
 				{/* </div> */}
       </div>
@@ -151,7 +163,7 @@ const MyList = ({ config,testData, }: { config: any; testData: any }) => {
       style={{ 
         wordBreak: 'break-all', 
         ...config?.style, 
-        marginTop:config?.TopBottom === 'Bottom'? deltaHeight :'unset',
+        marginTop:config?.TopBottom === 'Bottom'? getDeltaHeight() :'unset',
         whiteSpace:'nowrap' 
       }}
     >
@@ -161,7 +173,7 @@ const MyList = ({ config,testData, }: { config: any; testData: any }) => {
         // console.log(getTextWidth(`Data${val}`,config?.style?.fontSize+'px'),rate,config?.width?.split('px')?.[0])
         const finalRate = rate < 1 ? rate : 1
         const transparent = (1-finalRate) * config?.width?.split('px')?.[0] / 2
-        return <div style={{transform:`matrix(${finalRate},0,0,1,-${transparent},0)`}}><span>Data{val}</span></div>
+        return <div id='list-child' style={{transform:`matrix(${finalRate},0,0,1,-${transparent},0)`}}><span>Data{val}</span></div>
       })}
     </div>
   )

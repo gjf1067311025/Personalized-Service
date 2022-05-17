@@ -255,7 +255,7 @@ const Canvas: FC = () => {
               // fromTo = workbook.Sheets[sheet]['!ref'] || '';
               // console.log(XLSX.utils.sheet_to_json(workbook.Sheets[sheet]))
               // const sheetStr = XLSX.utils.sheet_to_json(workbook.Sheets[sheet],{header:1})
-              sheetContent.push(XLSX.utils.sheet_to_json(workbook.Sheets[sheet],{raw:false}))
+              sheetContent.push(XLSX.utils.sheet_to_json(workbook.Sheets[sheet],{raw:false,defval:''}))
               // console.log(sheetContent)
               // let id = ''
               let curVal = {}
@@ -451,9 +451,9 @@ const Canvas: FC = () => {
         />,
         div
       );
-      console.log(`finish render ${index}`)
+      console.log(`finish render ${index+1}`)
       if (number) {
-        number.innerHTML = `${images?.length?`${images?.length} / ${testSrc?.length}` : '正在加载数据中'}`;
+        number.innerHTML = `生成图片 ${images?.length?`${images?.length} / ${testSrc?.length}` : '正在加载数据中'}`;
       }
       const dom = document.getElementById(`father${index+1}`);
       if(dom) {
