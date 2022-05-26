@@ -197,14 +197,18 @@ const Canvas: FC = () => {
       if(number) {
         number.innerHTML="打包中，这个过程往往需要几分钟"
       }
-      zip.generateAsync({ type: "blob" }).then((res) => {
+      zip.generateAsync({ type: "blob" }, (metaData: any)=>{
+        if(number) {
+          number.innerHTML=`打包中，进度为${metaData.percent}%`
+        }
+      }).then((res) => {
           const elementA = document.createElement('a');
 
           elementA.download = '文件.zip';
           elementA.style.display = 'none';
 
           const blob = new Blob([res]);
-
+          console.log('finish all')
           elementA.href = URL.createObjectURL(blob);
           document.body.appendChild(elementA);
           elementA.click();
