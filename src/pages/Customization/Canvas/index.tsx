@@ -466,7 +466,7 @@ const Canvas: FC = () => {
         const width = parseValue(box.width);
         const height = parseValue(box.height);
         // 获取像素比-防止模糊
-        const scaleBy = DPR();
+        const scaleBy = 300/96;
         // 创建自定义 canvas 元素
         const canvas = document.createElement('canvas');
 
@@ -474,17 +474,18 @@ const Canvas: FC = () => {
         canvas.width = width * scaleBy;
         canvas.height = height * scaleBy;
         // 设定 canvas css宽高为 DOM 节点宽高
-        canvas.style.width = `${width}px`;
-        canvas.style.height = `${height}px`;
+        canvas.style.width = `${width * scaleBy}px`;
+        canvas.style.height = `${height * scaleBy}px`;
         const context = canvas.getContext('2d');
         // console.log(a)
         if (context) {
           // 将所有绘制内容放大像素比倍
           // context.scale(scaleBy, scaleBy);
           // 将自定义 canvas 作为配置项传入，开始绘制
-          // console.log(div, 222);
+          console.log(scaleBy,DPR(), 222);
           const canvasAll = await html2canvas(dom, {
             canvas,
+            scale: scaleBy,
             allowTaint: true,
             useCORS: true,
             scrollX: 0,
